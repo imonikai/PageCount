@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>枚数換算するやつ</title>
+</head>
+<style>
+    body {
+        background-color:#fbfaf5;
+        margin: 2em;
+        text-align: center;
+    }
+    textarea {
+        margin: 2em;
+        margin-top: 0;
+        margin-bottom: 0;
+        width: 50em;
+        height: 20em;
+    }
+    p {
+        margin: 0.5em;
+    }
+
+    .input {
+        margin: 1em;
+    }
+
+    #copyright {
+        margin-top: 2em;
+    }
+</style>
+<body>
+    <h1>枚数換算するやつ</h1>
+    <p>これは、指定された文章を指定された原稿設定に基づいて枚数換算をするやつです。</br>
+    小説新人賞とかのやつとかにご利用ください。</p>
+    <p>入力された情報はブラウザ上のみで処理され、外部に送信することはありません。</p>
+    <p>ファイルからの読み込みは、txtファイルのみ可能です。</p>
+    <details>
+        <summary>細かい仕様はこちら</summary>
+            改行のみの行を１行と判定します。<br>
+            １行の文字数に満たない行でも改行があれば１行分カウントします<br>
+            禁則処理を考慮しません。<br>
+    </details>
+    <a href="" >ソースコードはこちら。連絡がある場合もこちら。</a>
+    <div class="input">
+        <label for="lineCharNum">１行の文字数</label>
+        <input type="number" id="lineCharNum" value="40" min="1">
+        <label for="lineNum">１ページの行数</label>
+        <input type="number" id="lineNum" value="32" min="1">
+    </div>
+    <div class="input">
+        <input type="file" id="fileInput" accept=".txt">
+    </div>
+    <textarea id="text"></textarea>
+    <div class="input">
+        <input type="button" id="calcButton" value="換算">
+    </div>
+    <div>
+        <div>文字数　: <span id="charCount"></span></div>
+        <div>ページ数: <span id="pageCount"></span></div>
+    </div>
+    <p id="copyright">© 2023 imonikai</p>
+</body>
+
+<script>
+    const textObj = document.getElementById('text');
+    const lineCharNumObj = document.getElementById('lineCharNum');
+    const lineNumObj = document.getElementById('lineNum');
+    const charCountObj = document.getElementById('charCount');
+    const pageCountObj = document.getElementById('pageCount');
+
+    function clacPageCount(str, lineCharNum, lineNum) {
+        const strArray = str.split(/\r\n|\n/);
+        let lineCount = 0;
+        let pageCount = 0;
+
+        for( let i = 0; i < strArray.length; i++ ) {
+            //改行のみの行は１行カウント
+            if(strArray[i] == '')
+                lineCount++;
+            //１段落の文字数を１行分の文字数で割った数（行数）を加算
+            else
+                lineCount += Math.ceil(strArray[i].length / lineCharNum);
+        }
+        pageCount += Math.ceil(lineCount / lineNum);
+
+        return pageCount;
+    }
+
+    function calc() {
+        const textStr = textObj.value;
+        const lineCharNum = parseInt(lineCharNumObj.value);
+        const lineNum     = parseInt(lineNumObj.value);
+
+        if(lineCharNum <= 0 || lineNum <= 0 || isNaN(lineCharNum) || isNaN(lineNum) ) {
+            alert('文字数と行数を正の整数に設定してください。');
+            return;
+        }
+
+        charCount.innerText = textStr.length;
+        pageCount.innerText = clacPageCount(textStr, lineCharNum, lineNum);
+    }
+
+    textObj.addEventListener('blur', function() {
+        calc();
+    });
+
+    const fileInputObj = document.getElementById('fileInput');
+    fileInputObj.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.readAsText(file);
+
+        reader.onload = () => {
+            textObj.value = reader.result;
+            calc();
+        }
+
+        reader.onerror = () => {
+          alert('ファイルの読み込みに失敗しました。');
+        }
+    });
+
+    document.getElementById('calcButton').addEventListener('click', function(){
+        calc();
+    });
+</script>
+</html>
