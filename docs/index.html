@@ -70,7 +70,7 @@
     const charCountObj = document.getElementById('charCount');
     const pageCountObj = document.getElementById('pageCount');
 
-    function clacPageCount(str, lineCharNum, lineNum) {
+    function calcPageCount(str, lineCharNum, lineNum) {
         const strArray = str.split(/\r\n|\n/);
         let lineCount = 0;
         let pageCount = 0;
@@ -98,8 +98,8 @@
             return;
         }
 
-        charCount.innerText = textStr.length;
-        pageCount.innerText = clacPageCount(textStr, lineCharNum, lineNum);
+        charCountObj.innerText = String(textStr.length);
+        pageCountObj.innerText = String(calcPageCount(textStr, lineCharNum, lineNum));
     }
 
     textObj.addEventListener('blur', function() {
