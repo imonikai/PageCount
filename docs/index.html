@@ -34,11 +34,10 @@
     <p>これは、指定された文章を、指定された原稿設定に基づいて枚数換算するやつです。</br>
     小説新人賞のやつとかにご利用ください。</p>
     <p>入力された情報はブラウザ上のみで処理され、外部に送信することはありません。</p>
-    <p>ファイルからの読み込みは、utf-8のtxtファイルのみ可能です。</p>
     <details>
         <summary>細かい仕様はこちら</summary>
-            <p>改行のみの行を１行と判定します。</p>
             <p>１行の文字数に満たない行でも改行があれば１行分カウントします。</p>
+            <p>改行のみの行も１行と判定します。</p>
             <p>禁則処理を考慮しません。</p>
     </details>
     <a href="https://github.com/imonikai/PageCount" >ソースコードはこちら。連絡がある場合もこちら。</a>
@@ -51,6 +50,12 @@
     </div>
     <div class="input">
         <input type="file" id="fileInput" accept=".txt">
+        <label for="charcode">ファイルの文字コード</label>
+        <select id="charcode" required>
+            <option value="utf-8">UTF-8</option>
+            <option value="shift-jis">Shift-JIS</option>
+            <option value="euc-jp">EUC-JP</option>
+        </select>
     </div>
     <textarea id="text"></textarea>
     <div class="input">
@@ -66,12 +71,14 @@
 
 <script>
     const fileInputObj = document.getElementById('fileInput');
+    const charcodeObj = document.getElementById('charcode');
     const textObj = document.getElementById('text');
     const lineCharNumObj = document.getElementById('lineCharNum');
     const lineNumObj = document.getElementById('lineNum');
     const charCountObj = document.getElementById('charCount');
     const lineCountObj = document.getElementById('lineCount');
     const pageCountObj = document.getElementById('pageCount');
+    let file = null;
     let charCount = 0;
     let lineCount = 0;
     let pageCount = 0;
@@ -104,6 +111,24 @@
         return pageCount;
     }
 
+    function loadFile()
+    {
+        if(file === null)
+            return ;
+
+        const reader = new FileReader();
+        reader.readAsText(file, charcodeObj.value);
+
+        reader.onload = () => {
+            textObj.value = reader.result;
+            clearResult();
+        }
+
+        reader.onerror = () => {
+            alert('ファイルの読み込みに失敗しました。');
+        }
+    }
+
     function process() {
         const lineCharNum = parseInt(lineCharNumObj.value);
         const lineNum     = parseInt(lineNumObj.value);
@@ -126,20 +151,16 @@
     lineNumObj.addEventListener('change', clearResult);
 
     /* ファイルを読み込んだときはテキストエリアにファイルの内容を書き込み、前の計算の結果を消す */
-    fileInputObj.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
+    fileInputObj.addEventListener('change', function(e) {
+        file = e.target.files[0];
+        loadFile();
+        clearResult();
+    });
 
-        reader.readAsText(file);
-
-        reader.onload = () => {
-            textObj.value = reader.result;
-            clearResult();
-        }
-
-        reader.onerror = () => {
-          alert('ファイルの読み込みに失敗しました。');
-        }
+    /* */
+    charcodeObj.addEventListener('change', function(){
+        loadFile();
+        clearResult();
     });
 
     /* 換算ボタンが押されたときに計算する */
