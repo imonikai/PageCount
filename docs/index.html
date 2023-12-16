@@ -58,24 +58,40 @@
     </div>
     <div>
         <div>文字数　: <span id="charCount"></span></div>
+        <div>行数　　: <span id="lineCount"></span></div>
         <div>ページ数: <span id="pageCount"></span></div>
     </div>
     <p id="copyright">© 2023 imonikai</p>
 </body>
 
 <script>
+    const fileInputObj = document.getElementById('fileInput');
     const textObj = document.getElementById('text');
     const lineCharNumObj = document.getElementById('lineCharNum');
     const lineNumObj = document.getElementById('lineNum');
     const charCountObj = document.getElementById('charCount');
+    const lineCountObj = document.getElementById('lineCount');
     const pageCountObj = document.getElementById('pageCount');
+    let charCount = 0;
+    let lineCount = 0;
+    let pageCount = 0;
 
-    function calcPageCount(str, lineCharNum, lineNum) {
+    function clearResult() {
+        charCountObj.innerText = '';
+        lineCountObj.innerText = '';
+        pageCountObj.innerText = '';
+    }
+
+    function calc(str, lineCharNum, lineNum) {
         const strArray = str.split(/\r\n|\n/);
-        let lineCount = 0;
-        let pageCount = 0;
+        charCount = 0;
+        lineCount = 0;
+        pageCount = 0;
 
         for( let i = 0; i < strArray.length; i++ ) {
+            //文字数カウント
+            charCount += strArray[i].length;
+
             //改行のみの行は１行カウント
             if(strArray[i] == '')
                 lineCount++;
@@ -88,25 +104,28 @@
         return pageCount;
     }
 
-    function calc() {
-        const textStr = textObj.value;
+    function process() {
         const lineCharNum = parseInt(lineCharNumObj.value);
         const lineNum     = parseInt(lineNumObj.value);
 
-        if(lineCharNum <= 0 || lineNum <= 0 || isNaN(lineCharNum) || isNaN(lineNum) ) {
+        if( isNaN(lineCharNum) || isNaN(lineNum) || lineCharNum <= 0 || lineNum <= 0 ) {
             alert('文字数と行数を正の整数に設定してください。');
             return;
         }
 
-        charCountObj.innerText = String(textStr.length);
-        pageCountObj.innerText = String(calcPageCount(textStr, lineCharNum, lineNum));
+        calc(textObj.value, lineCharNum, lineNum);
+
+        charCountObj.innerText = String(charCount);
+        lineCountObj.innerText = String(lineCount);
+        pageCountObj.innerText = String(pageCount);
     }
 
-    textObj.addEventListener('blur', function() {
-        calc();
-    });
+    /* テキストエリアか設定が変更されたときは前の計算の結果を消す */
+    textObj.addEventListener('change', clearResult);
+    lineCharNumObj.addEventListener('change', clearResult);
+    lineNumObj.addEventListener('change', clearResult);
 
-    const fileInputObj = document.getElementById('fileInput');
+    /* ファイルを読み込んだときはテキストエリアにファイルの内容を書き込み、前の計算の結果を消す */
     fileInputObj.addEventListener('change', (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
@@ -115,7 +134,7 @@
 
         reader.onload = () => {
             textObj.value = reader.result;
-            calc();
+            clearResult();
         }
 
         reader.onerror = () => {
@@ -123,16 +142,10 @@
         }
     });
 
+    /* 換算ボタンが押されたときに計算する */
     document.getElementById('calcButton').addEventListener('click', function(){
-        calc();
+        process();
     });
 
-    lineCharNumObj.addEventListener('blur', function(){
-        calc();
-    })
-
-    lineNumObj.addEventListener('blur', function(){
-        calc();
-    })
 </script>
 </html>
