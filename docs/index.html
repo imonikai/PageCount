@@ -127,7 +127,7 @@
     function loadFile()
     {
         if(file === null)
-            return ;
+            return;
 
         const reader = new FileReader();
         reader.readAsText(file, charcodeObj.value);
@@ -162,6 +162,12 @@
     textObj.addEventListener('change', clearResult);
     lineCharNumObj.addEventListener('change', clearResult);
     lineNumObj.addEventListener('change', clearResult);
+
+    /** テキストエリアが変更されたとき、ファイルの読み込みを消す */
+    textObj.addEventListener('change', function(){
+        file = null;
+        fileInputObj.value = '';
+    });
 
     /* ファイルを読み込んだときはテキストエリアにファイルの内容を書き込み、前の計算の結果を消す */
     fileInputObj.addEventListener('change', function(e) {
